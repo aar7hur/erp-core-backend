@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IBcrypt } from 'src/shared/bcrypt/bcrypt.interface';
 import { UnauthorizedException } from '@nestjs/common';
@@ -9,7 +8,6 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService,
     private jwtService: JwtService,
     private bcryptService: IBcrypt,
     private configService: ConfigService,
@@ -22,32 +20,31 @@ export class AuthService {
    * @returns An object containing an access token if the sign-in is successful.
    * @throws UnauthorizedException if the provided credentials are invalid or the user does not exist.
    */
-  async signIn(email: string, password: string): Promise<any> {
-    // Retrieve the user from the database using the provided email
-    const user = await this.userService.findByEmail(email);
-
-    const isUserValid = await this.validateUser(user, password);
+  async signIn(
+    password: string,
+    userDbPassword: string,
+    email: string,
+    id: string,
+  ): Promise<object> {
+    const isUserValid = await this.validateUser(userDbPassword, password);
 
     if (!isUserValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return await this.login(user);
+    return await this.login(id, email);
   }
 
   private async validateUser(
-    user: void | GetUserDto,
+    userDbPassword: string,
     password: string,
   ): Promise<boolean> {
     // Throw UnauthorizedException if the user does not exist (for security reasons)
-    if (!user) {
-      return false;
-    }
 
     // Check if the provided password matches the user's stored password
     const isPasswordValid = await this.bcryptService.validatePassword(
       password,
-      user.password,
+      userDbPassword,
     );
 
     // Throw UnauthorizedException if the password is invalid
@@ -58,35 +55,11 @@ export class AuthService {
     return true;
   }
 
-  async getUserByToken(token: string): Promise<GetUserDto | null> {
-    const userId = await this.extractUserIdFromToken(token);
-
-    if (!userId) {
-      throw Error('User not found');
-    }
-
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      throw Error('User not found');
-    }
-
-    return user;
-  }
-
   async generateToken(userId: string): Promise<string> {
-    const token = await this.jwtService.signAsync(userId);
-    return token;
+    return await this.jwtService.signAsync(userId);
   }
 
-  async updatePassword(userid: string, password: string): Promise<void> {
-    await this.userService.updatePassword(userid, password);
-  }
-
-  async getUserByEmail(email: string): Promise<GetUserDto> {
-    return await this.userService.findByEmail(email);
-  }
-
-  private async extractUserIdFromToken(token: string): Promise<string | null> {
+  async extractUserIdFromToken(token: string): Promise<string | null> {
     try {
       const decodedToken: any = await this.jwtService.verifyAsync(token);
       return decodedToken.userId;
@@ -95,9 +68,9 @@ export class AuthService {
     }
   }
 
-  private async login(user: GetUserDto) {
+  private async login(userId: string, userEmail: string) {
     // Create a payload for the JWT token containing user information
-    const payload = { sub: user.id, name: user.email };
+    const payload = { sub: userId, name: userEmail };
 
     // Generate and return an access token using the JWT service
     return {

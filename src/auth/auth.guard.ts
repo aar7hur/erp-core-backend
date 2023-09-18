@@ -12,7 +12,10 @@ import { IS_PUBLIC_KEY } from 'src/shared/public/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private readonly reflector: Reflector) {}
+  constructor(
+    private jwtService: JwtService,
+    private readonly reflector: Reflector,
+  ) {}
 
   /**
    * Method to check if the incoming request has a valid JWT token in the 'Authorization' header.
@@ -22,7 +25,6 @@ export class AuthGuard implements CanActivate {
    * @throws UnauthorizedException If the token is missing or invalid.
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

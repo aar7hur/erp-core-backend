@@ -24,6 +24,10 @@ export class GetUserDto extends PartialType(CreateUserDto) {
   @ApiProperty()
   salt: number;
 
+  @IsNotEmpty()
+  @ApiProperty()
+  password: string;
+
   constructor(
     name: string,
     email: string,

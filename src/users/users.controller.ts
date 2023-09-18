@@ -6,9 +6,11 @@ import {
   Param,
   HttpStatus,
   HttpCode,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -27,5 +29,10 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);
+  }
+
+  @Put()
+  updateEmail(@Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateEmail(updateUserDto.id, updateUserDto.email);
   }
 }
