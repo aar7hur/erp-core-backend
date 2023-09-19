@@ -6,6 +6,7 @@ import { PrismaModule } from 'src/repository/prisma.module';
 import { PrismaUserRepository } from './repository/prisma-users.repository';
 import { IUserRepository } from './repository/user-repository.interface';
 import { SharedModule } from 'src/shared/shared.module';
+import { IUserService } from './user.service.interface';
 
 @Module({
   imports: [PrismaModule, SharedModule],
@@ -18,8 +19,8 @@ import { SharedModule } from 'src/shared/shared.module';
       useClass: PrismaUserRepository,
     },
     {
-      provide: IUserRepository,
-      useClass: PrismaUserRepository,
+      provide: IUserService,
+      useClass: UsersService,
     },
   ],
   exports: [UsersService],

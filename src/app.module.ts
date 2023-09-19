@@ -3,8 +3,8 @@ import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './shared/shared.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
-import { PasswordServiceService } from './auth/password-service/password-service.service';
 import configuration from './config/configuration';
+import { AgentModule } from './agent/agent.module';
 
 @Module({
   imports: [
@@ -13,9 +13,9 @@ import configuration from './config/configuration';
       isGlobal: true,
     }),
     UsersModule,
+    AgentModule,
     AuthModule,
     SharedModule,
   ],
-  providers: [PasswordServiceService],
 })
 export class AppModule {}

@@ -40,18 +40,4 @@ export class AuthController {
 
     await this.userService.updatePassword(userId, newPassword);
   }
-
-  @Public()
-  @Post('reset-password')
-  async resetPassword(@Body() body: ResetPasswordDto): Promise<void> {
-    const { token, newPassword } = body;
-    const userId = await this.authService.extractUserIdFromToken(token);
-
-    if (!userId) {
-      throw Error('Invalid or expired token.');
-    }
-    // improve this due to security reasons
-
-    await this.userService.updatePassword(userId, newPassword);
-  }
 }
